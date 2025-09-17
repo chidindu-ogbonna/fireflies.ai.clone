@@ -1,0 +1,55 @@
+{
+    "deno.enable": false,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.sortMembers": "explicit",
+        "source.organizeImports.biome": "explicit",
+        "source.fixAll": "explicit",
+        "quickfix.biome": "explicit"
+    },
+    "editor.defaultFormatter": "biomejs.biome",
+    "[typescript]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "json.schemas": [
+        {
+            "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
+            "fileMatch": [
+                "package.json",
+                "tsup.config.json"
+            ]
+        }
+    ],
+    "files.exclude": {
+        "**/.pnpm-store": true,
+        "**/.swc": true
+    },
+    "[dockercompose]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/public/workbox-*.js": true,
+        "**/public/workbox-*.js.map": true
+    },
+    "[json]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[ignore]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "[sql]": {
+        "editor.defaultFormatter": "adpyke.vscode-sql-formatter"
+    },
+    "npm.packageManager": "pnpm",
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+}
