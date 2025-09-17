@@ -7,7 +7,34 @@ import {
 	withRouterErrorHandler,
 } from "@/lib/server/api.utils";
 import { createClient } from "@deepgram/sdk";
+import axios from "axios";
 import { StatusCodes } from "http-status-codes";
+
+interface AccessTokenResponse {
+	access_token: string;
+	expires_in: number;
+}
+
+const getAccessToken = async (apiKey: string) => {
+	const response = await axios.post<AccessTokenResponse>(
+		"https://api.deepgram.com/v1/auth/grant",
+		{},
+		{
+			headers: {
+				Authorization: `Token ${apiKey}`,
+				"Content-Type": "application/json",
+			},
+		},
+	);
+	return response.data.access_token;
+};
+
+const returnDeepgramKeyWithAccessToken = async (
+	deepgramKey: Omit<DeepgramKey, "accessToken">,
+) => {
+	const accessToken = await getAccessToken(deepgramKey.key);
+	return makeResponse<DeepgramKey>({ data: { ...deepgramKey, accessToken } });
+};
 
 /**
  * This route is used to get the Deepgram API key for the user.
@@ -28,7 +55,7 @@ export const GET = withRouterErrorHandler(
 					where: { id: existingDeepgramKey.id },
 				});
 			} else {
-				return makeResponse<DeepgramKey>({ data: existingDeepgramKey });
+				return returnDeepgramKeyWithAccessToken(existingDeepgramKey);
 			}
 		}
 		const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
@@ -56,7 +83,7 @@ export const GET = withRouterErrorHandler(
 				userId,
 			},
 		});
-		return makeResponse<DeepgramKey>({ data: deepgramKey });
+		return returnDeepgramKeyWithAccessToken(deepgramKey);
 	},
-	{ isAuthRequired: true },
+	{ requireAuth: true },
 );

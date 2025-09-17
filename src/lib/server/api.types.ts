@@ -15,7 +15,7 @@ export type AppRouterContext<AppRouterParams = Record<string, string>> = {
 
 export interface HandlerConfig {
 	isWebhook?: boolean;
-	isAuthRequired?: boolean;
+	requireAuth?: boolean;
 }
 
 export type AppRouterHandler<

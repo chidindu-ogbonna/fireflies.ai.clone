@@ -19,9 +19,9 @@ export function AuthButton() {
 	if (session) {
 		return (
 			<div className="flex items-center gap-4">
-				<span className="text-sm text-muted-foreground">
+				{/* <span className="text-sm text-muted-foreground">
 					{session.user?.email}
-				</span>
+				</span> */}
 				<Button
 					onClick={() => signOut({ callbackUrl: "/" })}
 					variant="outline"

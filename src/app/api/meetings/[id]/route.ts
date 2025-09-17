@@ -1,4 +1,4 @@
-import type { Meeting } from "@/lib/client/dashboard.client";
+import type { Meeting } from "@/lib/client/meetings.client";
 import prisma from "@/lib/datastore";
 import { ServerError } from "@/lib/server/api.error";
 import {
@@ -21,6 +21,8 @@ export const GET = withRouterErrorHandler(
 				transcription: true,
 				summary: true,
 				actionItems: true,
+				videoUrl: true,
+				duration: true,
 			},
 		});
 		if (!meeting) {
@@ -31,5 +33,5 @@ export const GET = withRouterErrorHandler(
 		}
 		return makeResponse<Meeting>({ data: meeting });
 	},
-	{ isAuthRequired: true },
+	{ requireAuth: true },
 );

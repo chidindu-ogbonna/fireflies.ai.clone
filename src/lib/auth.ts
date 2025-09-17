@@ -1,10 +1,9 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
-const prisma = new PrismaClient();
+import prisma from "./datastore";
+import { TIME_IN_SECONDS } from "./utils";
 
 export const authOptions: NextAuthOptions = {
 	adapter: PrismaAdapter(prisma),
@@ -42,6 +41,8 @@ export const authOptions: NextAuthOptions = {
 	],
 	session: {
 		strategy: "jwt",
+		maxAge: TIME_IN_SECONDS.SEVEN_DAYS,
+		updateAge: TIME_IN_SECONDS.ONE_DAY,
 	},
 	pages: {
 		signIn: "/",

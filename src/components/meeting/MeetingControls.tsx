@@ -63,7 +63,7 @@ export function MeetingControls({
 				onClick={isRecording ? onStopRecording : onStartRecording}
 				className={
 					isRecording
-						? "bg-destructive hover:bg-destructive/90"
+						? "bg-destructive hover:bg-destructive/90 animate-pulse"
 						: "bg-green-600 hover:bg-green-700"
 				}
 			>

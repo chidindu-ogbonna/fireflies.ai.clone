@@ -1,128 +1,98 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Loader2, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { createMeetingSummary } from "@/lib/client/meetings.client";
+import { useMutation } from "@tanstack/react-query";
+import { Sparkles } from "lucide-react";
+import { useState } from "react";
 
 interface SummaryDisplayProps {
-  meetingId: string
-  summary?: string | null
-  actionItems?: string | null
-  onSummaryGenerated?: (summary: string, actionItems: string) => void
+	meetingId: string;
+	summary?: string | null;
+	actionItems?: string | null;
 }
 
 export function SummaryDisplay({
-  meetingId,
-  summary,
-  actionItems,
-  onSummaryGenerated
+	meetingId,
+	summary,
+	actionItems,
 }: SummaryDisplayProps) {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [currentSummary, setCurrentSummary] = useState(summary)
-  const [currentActionItems, setCurrentActionItems] = useState(actionItems)
+	const [currentSummary, setCurrentSummary] = useState(summary);
+	const [currentActionItems, setCurrentActionItems] = useState(actionItems);
 
-  const generateSummary = async () => {
-    setIsGenerating(true)
+	const { mutate: generateSummary, isPending } = useMutation({
+		mutationFn: createMeetingSummary,
+		onSuccess: (data) => {
+			setCurrentSummary(data.summary);
+			setCurrentActionItems(data.actionItems);
+		},
+		onError: (error) => {
+			console.error("Error generating summary:", error);
+		},
+	});
 
-    try {
-      const response = await fetch(`/api/meetings/${meetingId}/summary`, {
-        method: "POST",
-      })
+	if (!currentSummary && !currentActionItems) {
+		return (
+			<div className="rounded-lg border p-6">
+				<div className="text-center space-y-2">
+					<div className="flex items-center justify-center gap-2">
+						<Sparkles className="h-5 w-5 text-primary" />
+						<h3 className="text-lg font-semibold">AI Summary</h3>
+					</div>
+					<div className="text-muted-foreground mb-4 text-sm">
+						Generate an AI-powered summary and action items from this meeting
+					</div>
+					<Button
+						onClick={() => generateSummary(meetingId)}
+						disabled={isPending}
+						className="bg-primary hover:bg-primary/90"
+						isLoading={isPending}
+					>
+						<Sparkles className="h-4 w-4 mr-2" />
+						Generate Summary
+					</Button>
+				</div>
+			</div>
+		);
+	}
 
-      if (response.ok) {
-        const data = await response.json()
-        setCurrentSummary(data.summary)
-        setCurrentActionItems(data.actionItems)
+	return (
+		<div className="space-y-6">
+			{currentSummary && (
+				<div className="rounded-lg border p-6">
+					<h3 className="text-lg font-semibold mb-4">Meeting Summary</h3>
+					<div className="prose max-w-none">
+						<div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+							{currentSummary}
+						</div>
+					</div>
+				</div>
+			)}
 
-        if (onSummaryGenerated) {
-          onSummaryGenerated(data.summary, data.actionItems)
-        }
-      } else {
-        console.error("Failed to generate summary")
-      }
-    } catch (error) {
-      console.error("Error generating summary:", error)
-    } finally {
-      setIsGenerating(false)
-    }
-  }
+			{currentActionItems && (
+				<div className="rounded-lg border p-6">
+					<h3 className="text-lg font-semibold mb-4">Action Items</h3>
+					<div className="prose max-w-none">
+						<div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+							{currentActionItems}
+						</div>
+					</div>
+				</div>
+			)}
 
-  if (!currentSummary && !currentActionItems) {
-    return (
-      <div className="bg-white rounded-lg border p-6">
-        <div className="text-center">
-          <Sparkles className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">AI Summary</h3>
-          <p className="text-gray-600 mb-4">
-            Generate an AI-powered summary and action items from this meeting
-          </p>
-          <Button
-            onClick={generateSummary}
-            disabled={isGenerating}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Generate Summary
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      {currentSummary && (
-        <div className="bg-white rounded-lg border p-6">
-          <h3 className="text-lg font-semibold mb-4">Meeting Summary</h3>
-          <div className="prose max-w-none">
-            <div className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-              {currentSummary}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {currentActionItems && (
-        <div className="bg-white rounded-lg border p-6">
-          <h3 className="text-lg font-semibold mb-4">Action Items</h3>
-          <div className="prose max-w-none">
-            <div className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-              {currentActionItems}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {(currentSummary || currentActionItems) && (
-        <div className="text-center">
-          <Button
-            onClick={generateSummary}
-            disabled={isGenerating}
-            variant="outline"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Regenerating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Regenerate Summary
-              </>
-            )}
-          </Button>
-        </div>
-      )}
-    </div>
-  )
+			{(currentSummary || currentActionItems) && (
+				<div className="text-center">
+					<Button
+						onClick={() => generateSummary(meetingId)}
+						disabled={isPending}
+						variant="outline"
+						isLoading={isPending}
+					>
+						<Sparkles className="h-4 w-4 mr-2" />
+						Regenerate Summary
+					</Button>
+				</div>
+			)}
+		</div>
+	);
 }

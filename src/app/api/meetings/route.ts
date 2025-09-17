@@ -1,4 +1,4 @@
-import type { Meeting } from "@/lib/client/dashboard.client";
+import type { Meeting } from "@/lib/client/meetings.client";
 import prisma from "@/lib/datastore";
 import {
 	getSessionUserId,
@@ -6,11 +6,19 @@ import {
 	validateDataOrThrow,
 	withRouterErrorHandler,
 } from "@/lib/server/api.utils";
+import { uploadVideoToBlob } from "@/lib/server/blob";
 import { z } from "zod";
 
 const MeetingSchema = z.object({
-	title: z.string().optional(),
-	transcription: z.string(),
+	title: z
+		.string()
+		.optional()
+		.default(`Meeting - ${new Date().toLocaleDateString()}`),
+	transcription: z.string().trim(),
+	duration: z
+		.string()
+		.optional()
+		.transform((val) => (val ? Number.parseInt(val) : undefined)),
 });
 
 export const GET = withRouterErrorHandler(
@@ -25,24 +33,37 @@ export const GET = withRouterErrorHandler(
 				createdAt: true,
 				summary: true,
 				actionItems: true,
+				videoUrl: true,
+				duration: true,
 			},
 		});
 		return makeResponse<Meeting[]>({ data: meetings });
 	},
-	{ isAuthRequired: true },
+	{ requireAuth: true },
 );
 
 export const POST = withRouterErrorHandler(
 	async (req, _context, session) => {
 		const userId = getSessionUserId(session);
-		const { title, transcription } = validateDataOrThrow({
-			data: await req.json(),
+		const formData = await req.formData();
+		const { title, transcription, duration } = validateDataOrThrow({
+			data: {
+				title: formData.get("title") as string,
+				transcription: formData.get("transcription") as string,
+				duration: formData.get("duration") as string,
+			},
 			schema: MeetingSchema,
+		});
+		const videoUrl = await uploadVideoToBlob({
+			userId,
+			videoFile: formData.get("video") as File | null,
 		});
 		const meeting = await prisma.meeting.create({
 			data: {
-				title: title || `Meeting - ${new Date().toLocaleDateString()}`,
-				transcription: transcription.trim(),
+				title,
+				transcription,
+				videoUrl,
+				duration: duration,
 				userId,
 			},
 			select: {
@@ -51,9 +72,11 @@ export const POST = withRouterErrorHandler(
 				createdAt: true,
 				summary: true,
 				actionItems: true,
+				videoUrl: true,
+				duration: true,
 			},
 		});
 		return makeResponse<Meeting>({ data: meeting });
 	},
-	{ isAuthRequired: true },
+	{ requireAuth: true },
 );

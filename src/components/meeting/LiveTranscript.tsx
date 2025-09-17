@@ -13,6 +13,7 @@ export function LiveTranscript({
 }: LiveTranscriptProps) {
 	const scrollRef = useRef<HTMLDivElement>(null);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (scrollRef.current) {
 			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -20,7 +21,7 @@ export function LiveTranscript({
 	}, [transcript]);
 
 	return (
-		<div className="h-full border rounded-lg p-4">
+		<div className="h-full rounded-lg p-4">
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="text-lg font-semibold">Live Transcript</h3>
 				<div className="flex items-center">
@@ -44,9 +45,15 @@ export function LiveTranscript({
 							: "Start recording to see live transcription"}
 					</p>
 				) : (
-					<div className="space-y-2">
-						{transcript.map((text) => (
-							<p key={text} className="text-sm leading-relaxed">
+					<div className="space-y-2 break-words">
+						{transcript.map((text, index) => (
+							<p
+								key={`${text}-${
+									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+									index
+								}`}
+								className="text-sm leading-relaxed"
+							>
 								{text}
 							</p>
 						))}

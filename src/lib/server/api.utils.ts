@@ -12,6 +12,7 @@ import type {
 	HandlerConfig,
 	MakeResponseConfig,
 } from "./api.types";
+import { logger } from "./logger";
 
 /**
  * Wrap the handler with error handling.
@@ -24,14 +25,14 @@ export const withRouterErrorHandler = <
 	handler: AppRouterHandler<AppRouterParams>,
 	config?: HandlerConfig,
 ) => {
-	const { isWebhook = false, isAuthRequired = false } = config || {};
+	const { isWebhook = false, requireAuth = false } = config || {};
 	return async (
 		req: NextRequest,
 		context: AppRouterContext<AppRouterParams>,
 	) => {
 		try {
 			let session: Session | null = null;
-			if (isAuthRequired) {
+			if (requireAuth) {
 				session = await getServerSession(authOptions);
 				if (!session) {
 					return makeResponse({
@@ -42,6 +43,7 @@ export const withRouterErrorHandler = <
 			}
 			return await handler(req, context, session);
 		} catch (error) {
+			logger.error(error, "withRouterErrorHandler");
 			return makeResponse({
 				error: ServerError.fromError(error, StatusCodes.INTERNAL_SERVER_ERROR),
 				isWebhook,
@@ -72,7 +74,14 @@ export const validateDataOrThrow = <T extends ZodSchema>(params: {
  * Get the error status code.
  * If the status code is not between 400 and 500, it will return 500.
  */
-const getErrorStatusCode = (statusCode: number) => {
+const getErrorStatusCode = (
+	error: ServerError | Error,
+	defaultCode: number,
+) => {
+	if (ServerError.isServerError(error)) {
+		return error.statusCode;
+	}
+	const statusCode = defaultCode;
 	return (statusCode >= 400 && statusCode < 500) ||
 		(statusCode >= 500 && statusCode < 600)
 		? statusCode
@@ -95,7 +104,7 @@ export const makeResponse = async <T = object>({
 		if (isWebhook) {
 			return NextResponse.json(data || {}, { status: StatusCodes.OK });
 		}
-		const errorStatusCode = getErrorStatusCode(statusCode);
+		const errorStatusCode = getErrorStatusCode(error, statusCode);
 		return NextResponse.json(
 			{ error: errorMessage },
 			{ status: errorStatusCode },

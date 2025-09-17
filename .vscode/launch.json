@@ -17,5 +17,21 @@
             "outputCapture": "std",
             "cwd": "${workspaceFolder}"
         },
+        {
+            "name": "run script",
+            "request": "launch",
+            "runtimeExecutable": "npx",
+            "runtimeVersion": "22",
+            "runtimeArgs": [
+                "tsx",
+                "${file}"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}"
+        },
     ]
 }

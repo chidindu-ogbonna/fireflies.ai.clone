@@ -1,9 +1,12 @@
 import { Header } from "@/components/Header";
+import { DeepgramContextProvider } from "@/components/providers/DeepgramProvider";
+import { MicrophoneContextProvider } from "@/components/providers/MicrophoneProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Promise Flies",
+	title: "promiseFlies.ai",
 	description: "AI-powered meeting assistant with real-time transcription",
 };
 
@@ -40,7 +43,12 @@ export default function RootLayout({
 					<QueryProvider>
 						<SessionProvider>
 							<Header />
-							<main>{children}</main>
+							<MicrophoneContextProvider>
+								<DeepgramContextProvider>
+									<main>{children}</main>
+									<Toaster position="top-right" richColors theme="dark" />
+								</DeepgramContextProvider>
+							</MicrophoneContextProvider>
 						</SessionProvider>
 					</QueryProvider>
 				</ThemeProvider>

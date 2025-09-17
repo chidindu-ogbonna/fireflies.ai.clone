@@ -19,3 +19,21 @@ export const getErrorMessage = (error: ZodError | Error | unknown): string => {
 	}
 	return "Unknown error";
 };
+
+export const TIME_IN_SECONDS = {
+	ONE_DAY: 24 * 60 * 60,
+	ONE_WEEK: 7 * 24 * 60 * 60,
+	ONE_MONTH: 30 * 24 * 60 * 60,
+	ONE_YEAR: 365 * 24 * 60 * 60,
+	FIVE_MINUTES: 5 * 60,
+	SEVEN_DAYS: 7 * 24 * 60 * 60,
+};
+
+export const TIME_IN_MILLISECONDS = {
+	ONE_DAY: TIME_IN_SECONDS.ONE_DAY * 1000,
+	ONE_WEEK: TIME_IN_SECONDS.ONE_WEEK * 1000,
+	ONE_MONTH: TIME_IN_SECONDS.ONE_MONTH * 1000,
+	ONE_YEAR: TIME_IN_SECONDS.ONE_YEAR * 1000,
+	FIVE_MINUTES: TIME_IN_SECONDS.FIVE_MINUTES * 1000,
+	SEVEN_DAYS: TIME_IN_SECONDS.SEVEN_DAYS * 1000,
+};

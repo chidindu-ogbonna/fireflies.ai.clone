@@ -9,8 +9,17 @@ interface VideoTileProps {
 export function VideoTile({ onStreamReady }: VideoTileProps) {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const streamRef = useRef<MediaStream | null>(null);
+	const onStreamReadyRef =
+		useRef<VideoTileProps["onStreamReady"]>(onStreamReady);
 	const [stream, setStream] = useState<MediaStream | null>(null);
 	const [error, setError] = useState<string>("");
+
+	/**
+	 * Keep latest callback without triggering start/stop cycle
+	 */
+	useEffect(() => {
+		onStreamReadyRef.current = onStreamReady;
+	}, [onStreamReady]);
 
 	useEffect(() => {
 		const startCamera = async () => {
@@ -19,15 +28,13 @@ export function VideoTile({ onStreamReady }: VideoTileProps) {
 					video: true,
 					audio: true,
 				});
-
 				streamRef.current = mediaStream;
 				setStream(mediaStream);
 				if (videoRef.current) {
 					videoRef.current.srcObject = mediaStream;
 				}
-
-				if (onStreamReady) {
-					onStreamReady(mediaStream);
+				if (onStreamReadyRef.current) {
+					onStreamReadyRef.current(mediaStream);
 				}
 			} catch (err) {
 				setError("Failed to access camera and microphone");
@@ -38,7 +45,9 @@ export function VideoTile({ onStreamReady }: VideoTileProps) {
 		startCamera();
 
 		return () => {
-			// Cleanup the current stream when effect re-runs or component unmounts
+			/**
+			 * Cleanup the current stream when effect re-runs or component unmounts
+			 */
 			if (streamRef.current) {
 				for (const track of streamRef.current.getTracks()) {
 					track.stop();
@@ -46,7 +55,7 @@ export function VideoTile({ onStreamReady }: VideoTileProps) {
 				streamRef.current = null;
 			}
 		};
-	}, [onStreamReady]);
+	}, []);
 
 	if (error) {
 		return (
@@ -55,7 +64,6 @@ export function VideoTile({ onStreamReady }: VideoTileProps) {
 			</div>
 		);
 	}
-
 	return (
 		<div className="relative w-full calc(100vh - 200px) bg-black rounded-lg overflow-hidden">
 			<video

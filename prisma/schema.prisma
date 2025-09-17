@@ -28,13 +28,14 @@ model Meeting {
   updatedAt   DateTime @updatedAt
   summary     String?  @db.Text
   actionItems String?  @db.Text
+  videoUrl    String?  @db.Text
+  duration    Int?
 
   userId        String
   user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   transcription String? @db.Text
 }
 
-// Default NextAuth.js models
 model Account {
   id                String  @id @default(cuid())
   userId            String
