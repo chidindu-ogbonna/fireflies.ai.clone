@@ -14,22 +14,25 @@ interface ReplicateWhisperOutput {
 
 export const createTranscriptionSummary = async (transcription: string) => {
 	const { text } = await generateText({
-		model: openai("gpt-4o-mini"),
+		model: openai("gpt-5-mini"),
 		prompt: `
-Please analyze the following meeting transcript and provide:
-1. A concise summary (2-3 paragraphs) of the main topics discussed
-2. A bulleted list of key action items and decisions made
+Analyze the following meeting transcript and provide a structured response that includes:
+Summary: Write a concise, well-organized summary (2-3 paragraphs) covering the main topics, discussions, and overall outcomes. Avoid unnecessary details and keep the language professional and neutral.
+Action Items & Decisions: Provide a clear, bulleted list of key action items, assignments (with responsible parties if mentioned), and any important decisions or next steps. Use direct, actionable phrasing.
 
 Meeting Transcript:
 ${transcription}
 
-Please format your response as:
+Format your response as follows:
 
 SUMMARY:
-[Your summary here]
+[Your 2-3 paragraph summary here]
 
 ACTION ITEMS:
-[Your bulleted action items here]`,
+- [Action item #1]
+- [Action item #2]
+- [Action item #3]
+`,
 	});
 	const sections = text.split("ACTION ITEMS:");
 	const summary = sections[0].replace("SUMMARY:", "").trim();
