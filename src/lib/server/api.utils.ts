@@ -13,6 +13,11 @@ import type {
 	MakeResponseConfig,
 } from "./api.types";
 
+/**
+ * Wrap the handler with error handling.
+ * If the handler throws an error, it will return an error response.
+ * If the handler returns a response, it will return the response.
+ */
 export const withRouterErrorHandler = <
 	AppRouterParams extends Record<string, string> = Record<string, string>,
 >(
@@ -45,6 +50,10 @@ export const withRouterErrorHandler = <
 	};
 };
 
+/**
+ * Validate the data against the schema.
+ * If the data is invalid, it will throw an error.
+ */
 export const validateDataOrThrow = <T extends ZodSchema>(params: {
 	data:
 		| NextApiRequest["query"]
@@ -59,6 +68,10 @@ export const validateDataOrThrow = <T extends ZodSchema>(params: {
 	return data;
 };
 
+/**
+ * Get the error status code.
+ * If the status code is not between 400 and 500, it will return 500.
+ */
 const getErrorStatusCode = (statusCode: number) => {
 	return (statusCode >= 400 && statusCode < 500) ||
 		(statusCode >= 500 && statusCode < 600)
@@ -66,6 +79,11 @@ const getErrorStatusCode = (statusCode: number) => {
 		: StatusCodes.INTERNAL_SERVER_ERROR;
 };
 
+/**
+ * Make a response.
+ * If the error is present, it will return an error response.
+ * If the data is present, it will return a success response.
+ */
 export const makeResponse = async <T = object>({
 	error,
 	data,
@@ -86,6 +104,10 @@ export const makeResponse = async <T = object>({
 	return NextResponse.json(data || {}, { status: statusCode });
 };
 
+/**
+ * Get the user ID from the session.
+ * If the user is not authenticated, it will throw an error.
+ */
 export const getSessionUserId = (session: Session | null) => {
 	const userId = session?.user?.id;
 	if (!userId) {

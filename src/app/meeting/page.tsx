@@ -5,34 +5,122 @@ import { LiveTranscript } from "@/components/meeting/LiveTranscript";
 import { MeetingControls } from "@/components/meeting/MeetingControls";
 import { VideoTile } from "@/components/meeting/VideoTile";
 import { NoUser } from "@/components/no-user/NoUser";
-import { useDeepgram } from "@/hooks/useDeepgram";
+import {
+	getDeepgramApiKey,
+	getDeepgramWebSocketUrl,
+} from "@/lib/client/deepgram.client";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import useWebSocket from "react-use-websocket";
 
 export default function MeetingPage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const [stream, setStream] = useState<MediaStream | null>(null);
+	const { data: deepgramKey } = useQuery({
+		queryKey: ["deepgram-key"],
+		queryFn: getDeepgramApiKey,
+		enabled: !!session,
+	});
 
-	const {
-		transcript,
-		isRecording,
-		error,
-		startRecording,
-		stopRecording,
-		getFullTranscript,
-		clearTranscript,
-	} = useDeepgram();
+	const shouldConnectToWebSocket = Boolean(deepgramKey?.key);
+	const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(
+		deepgramKey?.key ? getDeepgramWebSocketUrl(deepgramKey?.key) : null,
+		{
+			onMessage: (event) => {
+				console.log("Deepgram message:", event.data);
+				// getWebSocket()?.close()
+
+				// try {
+				// 	const data = JSON.parse(event.data);
+				// 	if (data.channel && data.channel.alternatives) {
+				// 		const transcript = data.channel.alternatives[0]?.transcript;
+				// 		if (transcript && !data.is_final) {
+				// 			// Handle interim results
+				// 			console.log("Interim:", transcript);
+				// 		} else if (transcript && data.is_final) {
+				// 			// Handle final results
+				// 			setTranscript((prev) => [...prev, transcript]);
+				// 		}
+				// 	}
+				// } catch (error) {
+				// 	console.error("Error parsing Deepgram message:", error);
+				// }
+			},
+			shouldReconnect: () => shouldConnectToWebSocket,
+			reconnectAttempts: 3,
+			reconnectInterval: 3000,
+			protocols: [],
+			onOpen: () => {
+				console.log("WebSocket opened");
+			},
+			onClose: () => {
+				console.log("WebSocket closed");
+			},
+			onError: (error) => {
+				console.error("WebSocket error:", error);
+			},
+		},
+		shouldConnectToWebSocket,
+	);
+
+	// const {
+	// 	transcript,
+	// 	isRecording,
+	// 	error,
+	// 	startRecording,
+	// 	stopRecording,
+	// 	getFullTranscript,
+	// 	clearTranscript,
+	// } = useDeepgram(deepgramKey?.key);
+
+	const startRecording = () => {
+		console.log("Starting recording");
+	};
+
+	const stopRecording = () => {
+		console.log("Stopping recording");
+	};
+
+	// const clearTranscript = () => {
+	// 	console.log("Clearing transcript");
+	// };
+
+	const getFullTranscript = () => {
+		console.log("Getting full transcript");
+		return "";
+	};
+
+	const error = "";
+	const isRecording = false;
+	const transcript: string[] = [];
+
+	// clearTranscript();
 
 	const handleStreamReady = (mediaStream: MediaStream) => {
 		setStream(mediaStream);
 	};
 
 	const handleStartRecording = () => {
-		if (stream) {
-			startRecording(stream);
+		if (!stream) {
+			console.error("No stream available for recording");
+			return;
 		}
+
+		if (!stream.active) {
+			console.error("Stream is not active");
+			return;
+		}
+
+		console.log("Starting recording with stream:", {
+			active: stream.active,
+			audioTracks: stream.getAudioTracks().length,
+			videoTracks: stream.getVideoTracks().length,
+		});
+
+		startRecording();
 	};
 
 	const handleStopRecording = () => {

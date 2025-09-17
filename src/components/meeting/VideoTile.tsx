@@ -8,6 +8,7 @@ interface VideoTileProps {
 
 export function VideoTile({ onStreamReady }: VideoTileProps) {
 	const videoRef = useRef<HTMLVideoElement>(null);
+	const streamRef = useRef<MediaStream | null>(null);
 	const [stream, setStream] = useState<MediaStream | null>(null);
 	const [error, setError] = useState<string>("");
 
@@ -19,6 +20,7 @@ export function VideoTile({ onStreamReady }: VideoTileProps) {
 					audio: true,
 				});
 
+				streamRef.current = mediaStream;
 				setStream(mediaStream);
 				if (videoRef.current) {
 					videoRef.current.srcObject = mediaStream;
@@ -36,13 +38,15 @@ export function VideoTile({ onStreamReady }: VideoTileProps) {
 		startCamera();
 
 		return () => {
-			if (stream) {
-				for (const track of stream.getTracks()) {
+			// Cleanup the current stream when effect re-runs or component unmounts
+			if (streamRef.current) {
+				for (const track of streamRef.current.getTracks()) {
 					track.stop();
 				}
+				streamRef.current = null;
 			}
 		};
-	}, [onStreamReady, stream]);
+	}, [onStreamReady]);
 
 	if (error) {
 		return (
