@@ -1,3 +1,4 @@
+import { upload } from "@vercel/blob/client";
 import axios from "axios";
 
 export interface Meeting {
@@ -24,23 +25,38 @@ export const getMeetings = async () => {
 };
 
 export const createMeeting = async (meeting: CreateMeetingParams) => {
-	const formData = new FormData();
-	formData.append("title", meeting.title);
-	formData.append("transcription", meeting.transcription || "");
+	let videoUrl: string | null = null;
 
-	if (meeting.duration) {
-		formData.append("duration", meeting.duration.toString());
-	}
-
+	/**
+	 * Upload video directly to Vercel Blob if present
+	 */
 	if (meeting.videoBlob) {
-		formData.append("video", meeting.videoBlob, "meeting-recording.webm");
+		try {
+			const blob = await upload(
+				`du-meeting-recording-${Date.now()}.webm`,
+				meeting.videoBlob,
+				{
+					access: "public",
+					handleUploadUrl: "/api/meetings/upload",
+				},
+			);
+			videoUrl = blob.url;
+		} catch (error) {
+			console.error("Error uploading video to blob:", error);
+			throw new Error("Failed to upload video. Please try again.");
+		}
 	}
 
-	const response = await axios.post<Meeting>("/api/meetings", formData, {
-		headers: {
-			"Content-Type": "multipart/form-data",
+	const response = await axios.post<Meeting>(
+		"/api/meetings",
+		{
+			title: meeting.title,
+			transcription: meeting.transcription || "",
+			duration: meeting.duration,
+			videoUrl: videoUrl,
 		},
-	});
+		{ headers: { "Content-Type": "application/json" } },
+	);
 	return response.data;
 };
 

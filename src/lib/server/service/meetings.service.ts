@@ -11,6 +11,7 @@ interface CreateMeetingParams {
 	title: string;
 	transcription: string;
 	duration?: number;
+	videoUrl?: string | null;
 }
 
 export const createMeeting = async ({
@@ -19,11 +20,19 @@ export const createMeeting = async ({
 	title,
 	transcription,
 	duration,
+	videoUrl: providedVideoUrl,
 }: CreateMeetingParams) => {
-	const videoUrl = await uploadVideoToBlob({
-		userId,
-		videoFile,
-	});
+	let videoUrl = providedVideoUrl;
+	/**
+	 * Only upload if we have a video file and no URL was provided
+	 */
+	if (videoFile && !providedVideoUrl) {
+		videoUrl = await uploadVideoToBlob({
+			userId,
+			videoFile,
+		});
+	}
+
 	let summary: string | null = null;
 	let actionItems: string | null = null;
 	if (videoUrl) {

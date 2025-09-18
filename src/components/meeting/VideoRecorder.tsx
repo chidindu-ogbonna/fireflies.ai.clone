@@ -20,7 +20,6 @@ export function VideoRecorder({
 	const streamRef = useRef<MediaStream | null>(null);
 	const onStreamReadyRef =
 		useRef<VideoRecorderProps["onStreamReady"]>(onStreamReady);
-	const [stream, setStream] = useState<MediaStream | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	/**
@@ -38,7 +37,6 @@ export function VideoRecorder({
 					audio: true,
 				});
 				streamRef.current = mediaStream;
-				setStream(mediaStream);
 				setIsLoading(false);
 				if (videoRef.current) {
 					videoRef.current.srcObject = mediaStream;
@@ -69,25 +67,26 @@ export function VideoRecorder({
 	}, []);
 
 	return (
-		<div className="rounded-lg p-6">
-			<div className="flex items-center justify-between mb-2">
-				<div />
-				<div className="flex items-center">
-					<div
-						className={cn(
-							"flex items-center text-destructive gap-2 text-sm",
-							isRecording ? "opacity-100" : "opacity-0",
-						)}
-					>
-						<div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-						Recording
-					</div>
+		<div className="relative w-full h-full">
+			<div className="absolute top-4 right-4 z-10">
+				<div
+					className={cn(
+						"flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1 rounded-full transition-opacity",
+						isRecording ? "opacity-100" : "opacity-0",
+					)}
+				>
+					<div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+					REC
 				</div>
 			</div>
-			<div className="relative w-full calc(100vh - 200px) bg-transparent rounded-lg overflow-hidden">
+
+			<div className="relative w-full h-full bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
 				{isLoading && (
-					<div className="absolute inset-0 flex items-center justify-center rounded-lg">
-						<Spinner size={8} className="text-primary" />
+					<div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+						<div className="text-center">
+							<Spinner size={8} className="text-white mb-4" />
+							<p className="text-white/70 text-sm">Connecting to camera...</p>
+						</div>
 					</div>
 				)}
 				<video
@@ -98,10 +97,19 @@ export function VideoRecorder({
 					className="w-full h-full object-cover"
 				/>
 
-				{currentTranscript && isRecording && (
-					<div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 max-h-24 overflow-hidden">
-						<div className="text-white text-xs leading-relaxed">
-							{currentTranscript}
+				{isRecording && (
+					<div className="absolute bottom-6 left-6 right-6">
+						<div className="bg-muted/80 backdrop-blur-sm/50 rounded-lg p-2 border border-border">
+							<div className="flex items-center gap-2">
+								<span
+									className={"animate-pulse text-2xl text-muted-foreground"}
+								>
+									•
+								</span>
+								<div className="text-white text-sm overflow-hidden">
+									{currentTranscript}
+								</div>
+							</div>
 						</div>
 					</div>
 				)}

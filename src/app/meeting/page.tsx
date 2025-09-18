@@ -1,7 +1,6 @@
 "use client";
 
 import { LoadingComponent } from "@/components/loading/LoadingComponent";
-import { LiveTranscript } from "@/components/meeting/LiveTranscript";
 import { MeetingControls } from "@/components/meeting/MeetingControls";
 import { MeetingUploadDialog } from "@/components/meeting/MeetingUploadDialog";
 import { VideoRecorder } from "@/components/meeting/VideoRecorder";
@@ -21,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { createMeeting } from "@/lib/client/meetings.client";
 import type { LiveSchema } from "@deepgram/sdk";
 import { useMutation } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -342,43 +342,56 @@ export default function MeetingPage() {
 	}
 
 	return (
-		<div className="min-h-screen container mx-auto px-4 py-8 mb-10 ">
-			<Link href="/dashboard">
-				<Button variant="ghost" size="sm" className="mb-4">
-					<ArrowLeft className="h-4 w-4 mr-2" />
-					Back
-				</Button>
-			</Link>
+		<div className="fixed inset-0 flex flex-col">
+			<div className="absolute top-20 left-4 z-10">
+				<Link href="/dashboard">
+					<Button variant="ghost" size="sm">
+						<ArrowLeft className="h-4 w-4 mr-2" />
+						Back
+					</Button>
+				</Link>
+			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
-				<div className="lg:col-span-2 space-y-4">
+			<div className="flex-1 flex items-center justify-center p-8">
+				<div className="relative w-full max-w-4xl h-full max-h-[70vh]">
 					<VideoRecorder
 						onStreamReady={handleStreamReady}
 						isRecording={isRecording}
 						currentTranscript={currentTranscript}
 					/>
-				</div>
-				<div className="lg:col-span-1">
-					<LiveTranscript transcript={transcript} isRecording={isRecording} />
+
+					<div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+						<div className="text-white text-sm font-medium">
+							{session.user?.name || session.user?.email || "You"}
+						</div>
+					</div>
+
+					<div className="absolute top-16 left-4 bg-black/30 backdrop-blur-sm rounded-lg px-3 py-1">
+						<div className="text-white/70 text-xs">
+							{format(new Date(), "MMM d, yyyy • h:mm a")}
+						</div>
+					</div>
 				</div>
 			</div>
 
-			<div className="fixed bottom-0 left-0 right-0 border-t shadow-lg">
-				<MeetingControls
-					onStartRecording={handleStartRecording}
-					onPauseRecording={handlePauseRecording}
-					onResumeRecording={handleResumeRecording}
-					onEndMeeting={handleEndMeeting}
-					onToggleMute={handleToggleMute}
-					onToggleVideo={handleToggleVideo}
-					isRecording={isRecording}
-					isPaused={isPaused}
-					isAudioEnabled={isAudioEnabled}
-					isVideoEnabled={isVideoEnabled}
-					isEndMeetingEnabled={hasStartedRecording}
-					isStartingRecording={isStartingRecording}
-					isEndingRecording={isEndingRecording}
-				/>
+			<div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+				<div className="bg-muted backdrop-blur-sm rounded-full px-6 py-3 border border-border">
+					<MeetingControls
+						onStartRecording={handleStartRecording}
+						onPauseRecording={handlePauseRecording}
+						onResumeRecording={handleResumeRecording}
+						onEndMeeting={handleEndMeeting}
+						onToggleMute={handleToggleMute}
+						onToggleVideo={handleToggleVideo}
+						isRecording={isRecording}
+						isPaused={isPaused}
+						isAudioEnabled={isAudioEnabled}
+						isVideoEnabled={isVideoEnabled}
+						isEndMeetingEnabled={hasStartedRecording}
+						isStartingRecording={isStartingRecording}
+						isEndingRecording={isEndingRecording}
+					/>
+				</div>
 			</div>
 
 			<MeetingUploadDialog

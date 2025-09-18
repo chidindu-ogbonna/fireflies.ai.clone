@@ -15,6 +15,16 @@ const MeetingSchema = z.object({
 		.optional()
 		.default(`Meeting - ${new Date().toLocaleDateString()}`),
 	transcription: z.string().trim(),
+	duration: z.number().optional(),
+	videoUrl: z.string().url().optional().nullable(),
+});
+
+const FormDataMeetingSchema = z.object({
+	title: z
+		.string()
+		.optional()
+		.default(`Meeting - ${new Date().toLocaleDateString()}`),
+	transcription: z.string().trim(),
 	duration: z
 		.string()
 		.optional()
@@ -45,21 +55,43 @@ export const GET = withRouterErrorHandler(
 export const POST = withRouterErrorHandler(
 	async (req, _context, session) => {
 		const userId = getSessionUserId(session);
-		const formData = await req.formData();
-		const { title, transcription, duration } = validateDataOrThrow({
-			data: {
-				title: formData.get("title") as string,
-				transcription: formData.get("transcription") as string,
-				duration: formData.get("duration") as string,
-			},
+		const contentType = req.headers.get("content-type") || "";
+
+		/**
+		 * Handle legacy form data uploads
+		 */
+		if (contentType.includes("multipart/form-data")) {
+			const formData = await req.formData();
+			const { title, transcription, duration } = validateDataOrThrow({
+				data: {
+					title: formData.get("title") as string,
+					transcription: formData.get("transcription") as string,
+					duration: formData.get("duration") as string,
+				},
+				schema: FormDataMeetingSchema,
+			});
+			const meeting = await createMeeting({
+				userId,
+				videoFile: formData.get("video") as File | null,
+				title,
+				transcription,
+				duration,
+				videoUrl: null,
+			});
+			return makeResponse<Meeting>({ data: meeting });
+		}
+		const body = await req.json();
+		const { title, transcription, duration, videoUrl } = validateDataOrThrow({
+			data: body,
 			schema: MeetingSchema,
 		});
 		const meeting = await createMeeting({
 			userId,
-			videoFile: formData.get("video") as File | null,
+			videoFile: null,
 			title,
 			transcription,
 			duration,
+			videoUrl,
 		});
 		return makeResponse<Meeting>({ data: meeting });
 	},

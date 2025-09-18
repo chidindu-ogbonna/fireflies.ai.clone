@@ -45,15 +45,15 @@ export function MeetingControls({
 	isEndingRecording,
 }: MeetingControlsProps) {
 	return (
-		<div className="flex justify-center space-x-4 p-4 border-t">
+		<div className="flex items-center space-x-3">
 			<Button
-				variant={isAudioEnabled ? "outline" : "destructive"}
+				size="lg"
 				onClick={onToggleMute}
-				className={
+				className={`w-12 h-12 rounded-full transition-all duration-200 ${
 					isAudioEnabled
-						? "hover:bg-muted"
-						: "bg-destructive hover:bg-destructive/90"
-				}
+						? "bg-muted-foreground/80 hover:bg-muted-foreground/20 text-white"
+						: "bg-red-600 hover:bg-red-700 text-white"
+				}`}
 			>
 				{isAudioEnabled ? (
 					<Mic className="h-5 w-5" />
@@ -63,13 +63,13 @@ export function MeetingControls({
 			</Button>
 
 			<Button
-				variant={isVideoEnabled ? "outline" : "destructive"}
+				size="lg"
 				onClick={onToggleVideo}
-				className={
+				className={`w-12 h-12 rounded-full transition-all duration-200 ${
 					isVideoEnabled
-						? "hover:bg-muted"
-						: "bg-destructive hover:bg-destructive/90"
-				}
+						? "bg-muted-foreground/80 hover:bg-muted-foreground/20 text-white"
+						: "bg-red-600 hover:bg-red-700 text-white"
+				}`}
 			>
 				{isVideoEnabled ? (
 					<Video className="h-5 w-5" />
@@ -80,23 +80,23 @@ export function MeetingControls({
 
 			{isPaused ? (
 				<Button
-					variant="default"
+					size="lg"
 					onClick={onResumeRecording}
-					className="bg-green-700 hover:bg-green-800"
+					className="bg-muted-foreground/80 hover:bg-muted-foreground/20 text-white px-6 h-12 rounded-lg transition-all duration-200"
 				>
 					<Play className="h-5 w-5" />
 					Resume Recording
 				</Button>
 			) : (
 				<Button
-					variant={isRecording ? "outline" : "default"}
+					size="lg"
 					onClick={isRecording ? onPauseRecording : onStartRecording}
 					disabled={isStartingRecording}
-					className={
+					className={`px-6 h-12 rounded-lg transition-all duration-200 gap-2 ${
 						isRecording
-							? "bg-destructive hover:bg-destructive/90 animate-pulse"
+							? "bg-muted-foreground/80 hover:bg-muted-foreground/20 animate-pulse"
 							: "bg-green-700 hover:bg-green-800"
-					}
+					}`}
 				>
 					{isStartingRecording ? (
 						<>
@@ -118,16 +118,16 @@ export function MeetingControls({
 			)}
 
 			<Button
-				variant="destructive"
+				size="lg"
 				onClick={onEndMeeting}
 				disabled={!isEndMeetingEnabled || isEndingRecording}
+				className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all duration-200"
 			>
 				{isEndingRecording ? (
 					<Spinner className="text-inherit" />
 				) : (
 					<PhoneOff className="h-5 w-5" />
 				)}
-				End Recording
 			</Button>
 		</div>
 	);
