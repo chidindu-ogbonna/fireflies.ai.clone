@@ -6,7 +6,7 @@ import {
 	validateDataOrThrow,
 	withRouterErrorHandler,
 } from "@/lib/server/api.utils";
-import { uploadVideoToBlob } from "@/lib/server/blob";
+import { createMeeting } from "@/lib/server/service/meetings.service";
 import { z } from "zod";
 
 const MeetingSchema = z.object({
@@ -54,27 +54,12 @@ export const POST = withRouterErrorHandler(
 			},
 			schema: MeetingSchema,
 		});
-		const videoUrl = await uploadVideoToBlob({
+		const meeting = await createMeeting({
 			userId,
 			videoFile: formData.get("video") as File | null,
-		});
-		const meeting = await prisma.meeting.create({
-			data: {
-				title,
-				transcription,
-				videoUrl,
-				duration: duration,
-				userId,
-			},
-			select: {
-				id: true,
-				title: true,
-				createdAt: true,
-				summary: true,
-				actionItems: true,
-				videoUrl: true,
-				duration: true,
-			},
+			title,
+			transcription,
+			duration,
 		});
 		return makeResponse<Meeting>({ data: meeting });
 	},

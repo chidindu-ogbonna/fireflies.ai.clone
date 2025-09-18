@@ -11,17 +11,19 @@ export interface Meeting {
 	duration?: number | null;
 }
 
+type CreateMeetingParams = Pick<
+	Meeting,
+	"title" | "transcription" | "duration"
+> & {
+	videoBlob?: Blob | null;
+};
+
 export const getMeetings = async () => {
 	const response = await axios.get<Meeting[]>("/api/meetings");
 	return response.data;
 };
 
-export const createMeeting = async (
-	meeting: Pick<Meeting, "title" | "transcription"> & {
-		videoBlob?: Blob | null;
-		duration?: number;
-	},
-) => {
+export const createMeeting = async (meeting: CreateMeetingParams) => {
 	const formData = new FormData();
 	formData.append("title", meeting.title);
 	formData.append("transcription", meeting.transcription || "");

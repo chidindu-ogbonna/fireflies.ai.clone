@@ -33,7 +33,7 @@ export const columns: ColumnDef<Meeting>[] = [
 		accessorKey: "createdAt",
 		header: "Date",
 		cell: ({ row }) => {
-			return format(new Date(row.getValue("createdAt")), "PPP");
+			return format(new Date(row.getValue("createdAt")), "PP");
 		},
 	},
 	{
@@ -55,7 +55,7 @@ export const columns: ColumnDef<Meeting>[] = [
 			return (
 				<Link href={`/meetings/${meeting.id}`}>
 					<Button variant="outline" size="sm">
-						View Details
+						Open
 					</Button>
 				</Link>
 			);

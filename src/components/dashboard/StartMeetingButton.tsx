@@ -7,8 +7,8 @@ import Link from "next/link";
 export function StartMeetingButton() {
 	return (
 		<Link href="/meeting">
-			<Button className="bg-primary hover:bg-primary/90">
-				<Video className="mr-2 h-5 w-5" />
+			<Button className="bg-primary hover:bg-primary/90" size="sm">
+				<Video />
 				Start Meeting
 			</Button>
 		</Link>

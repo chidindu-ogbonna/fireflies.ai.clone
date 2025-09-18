@@ -2,7 +2,7 @@ import type { Meeting } from "@/lib/client/meetings.client";
 import prisma from "@/lib/datastore";
 import {
 	createTranscription,
-	createTranscriptionSummary,
+	createTranscriptionMetadata,
 } from "@/lib/server/ai/transcription";
 import { ServerError } from "@/lib/server/api.error";
 import {
@@ -37,7 +37,7 @@ export const POST = withRouterErrorHandler(
 			transcription = await createTranscription(meeting.videoUrl);
 		}
 		const { summary, actionItems } =
-			await createTranscriptionSummary(transcription);
+			await createTranscriptionMetadata(transcription);
 		const updatedMeeting = await prisma.meeting.update({
 			where: { id: meetingId },
 			data: { summary, actionItems, transcription },

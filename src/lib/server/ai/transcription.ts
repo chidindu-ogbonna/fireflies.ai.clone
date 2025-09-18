@@ -12,7 +12,11 @@ interface ReplicateWhisperOutput {
 	translation: string | null;
 }
 
-export const createTranscriptionSummary = async (transcription: string) => {
+export const createTranscriptionMetadata = async (transcription: string) => {
+	if (!transcription) {
+		return { summary: null, actionItems: null };
+	}
+
 	const { text } = await generateText({
 		model: openai("gpt-5-mini"),
 		prompt: `

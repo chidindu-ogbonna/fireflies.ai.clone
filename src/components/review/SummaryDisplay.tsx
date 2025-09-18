@@ -80,19 +80,7 @@ export function SummaryDisplay({
 				</div>
 			)}
 
-			{(currentSummary || currentActionItems) && (
-				<div className="text-center">
-					<Button
-						onClick={() => generateSummary(meetingId)}
-						disabled={isPending}
-						variant="outline"
-						isLoading={isPending}
-					>
-						<Sparkles className="h-4 w-4 mr-2" />
-						Regenerate Summary
-					</Button>
-				</div>
-			)}
+			
 		</div>
 	);
 }

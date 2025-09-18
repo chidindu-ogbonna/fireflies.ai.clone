@@ -22,16 +22,8 @@ export function LiveTranscript({
 
 	return (
 		<div className="h-full rounded-lg p-4">
-			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-lg font-semibold">Live Transcript</h3>
-				<div className="flex items-center">
-					{isRecording && (
-						<div className="flex items-center text-destructive">
-							<div className="w-2 h-2 bg-destructive rounded-full animate-pulse mr-2" />
-							Recording
-						</div>
-					)}
-				</div>
+			<div className="mb-4 border px-2 py-1 rounded-md">
+				<p className="text-sm text-muted-foreground">Live Transcript</p>
 			</div>
 
 			<div
@@ -41,8 +33,8 @@ export function LiveTranscript({
 				{transcript.length === 0 ? (
 					<p className="text-muted-foreground text-sm text-center">
 						{isRecording
-							? "Listening..."
-							: "Start recording to see live transcription"}
+							? "Listening for speech..."
+							: "Click \"Start Recording\" to begin live transcription."}
 					</p>
 				) : (
 					<div className="space-y-2 break-words">
