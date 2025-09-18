@@ -1,24 +1,35 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export function LoginForm() {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
+const toastGenericError = () => {
+	toast.error("Something went wrong. Please try again.", {
+		description:
+			"If the problem persists, please contact promise.bones@gmail.com",
+	});
+};
+
+const toastInvalidCredentials = () => {
+	toast.error("Invalid credentials. Try with the correct credentials.");
+};
+
+export function LoginForm({
+	demoEmail = "",
+	demoPassword = "",
+}: {
+	demoEmail?: string;
+	demoPassword?: string;
+}) {
+	const [email, setEmail] = useState(demoEmail);
+	const [password, setPassword] = useState(demoPassword);
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
@@ -32,25 +43,53 @@ export function LoginForm() {
 				redirect: false,
 			});
 			if (result?.error) {
-				toast.error("Invalid credentials");
+				toastInvalidCredentials();
 			} else {
 				router.push("/dashboard");
 			}
-		} catch (_error) {
-			toast.error("Something went wrong");
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (error) {
+			toastGenericError();
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
+	/**
+	 * Update form fields and auto-login when demo credentials change
+	 */
+	useEffect(() => {
+		if (demoEmail) {
+			setEmail(demoEmail);
+		}
+		if (demoPassword) {
+			setPassword(demoPassword);
+		}
+		if (demoEmail && demoPassword && !isLoading) {
+			setIsLoading(true);
+			signIn("credentials", {
+				email: demoEmail,
+				password: demoPassword,
+				redirect: false,
+			})
+				.then((result) => {
+					if (result?.error) {
+						toastInvalidCredentials();
+					} else {
+						router.push("/dashboard");
+					}
+				})
+				.catch(() => {
+					toastGenericError();
+				})
+				.finally(() => {
+					setIsLoading(false);
+				});
+		}
+	}, [demoEmail, demoPassword, isLoading, router]);
+
 	return (
-		<Card className="w-[350px]">
-			<CardHeader>
-				<CardTitle>Login</CardTitle>
-				<CardDescription>
-					Enter your credentials to access your account
-				</CardDescription>
-			</CardHeader>
+		<Card className="py-4 w-full max-w-sm mx-auto">
 			<CardContent>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
