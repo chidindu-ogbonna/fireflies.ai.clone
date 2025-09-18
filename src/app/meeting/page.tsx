@@ -70,6 +70,7 @@ export default function MeetingPage() {
 		videoBlob: Blob | null;
 		duration: number;
 	} | null>(null);
+	const [currentTranscript, setCurrentTranscript] = useState<string>("");
 
 	const createMeetingMutation = useMutation({
 		mutationFn: createMeeting,
@@ -88,9 +89,10 @@ export default function MeetingPage() {
 
 	const onTranscript = (data: LiveTranscriptionEvent) => {
 		const { is_final: isFinal, speech_final: speechFinal } = data;
-		const thisCaption = data.channel.alternatives[0].transcript;
+		const deepgramTranscript = data.channel.alternatives[0].transcript;
+		setCurrentTranscript(deepgramTranscript);
 		if (isFinal && speechFinal) {
-			setTranscript((prev) => [...prev, thisCaption]);
+			setTranscript((prev) => [...prev, deepgramTranscript]);
 		}
 	};
 
@@ -165,7 +167,6 @@ export default function MeetingPage() {
 	}, [microphoneState, deepgramConnectionState]);
 
 	const stopRecording = () => {
-		console.log("Stopping recording");
 		if (
 			mediaRecorderRef.current &&
 			mediaRecorderRef.current.state !== "inactive"
@@ -188,10 +189,7 @@ export default function MeetingPage() {
 				}
 			};
 			mediaRecorder.onstop = () => {
-				console.log(
-					"MediaRecorder stopped, chunks:",
-					recordedChunksRef.current.length,
-				);
+				console.log("recorder stopped");
 			};
 			mediaRecorderRef.current = mediaRecorder;
 			mediaRecorder.start(1000); // Record in 1-second chunks
@@ -357,6 +355,7 @@ export default function MeetingPage() {
 					<VideoRecorder
 						onStreamReady={handleStreamReady}
 						isRecording={isRecording}
+						currentTranscript={currentTranscript}
 					/>
 				</div>
 				<div className="lg:col-span-1">

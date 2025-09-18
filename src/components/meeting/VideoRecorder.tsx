@@ -8,11 +8,13 @@ import { toast } from "sonner";
 interface VideoRecorderProps {
 	onStreamReady?: (stream: MediaStream) => void;
 	isRecording?: boolean;
+	currentTranscript?: string;
 }
 
 export function VideoRecorder({
 	onStreamReady,
 	isRecording,
+	currentTranscript,
 }: VideoRecorderProps) {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const streamRef = useRef<MediaStream | null>(null);
@@ -95,6 +97,14 @@ export function VideoRecorder({
 					muted
 					className="w-full h-full object-cover"
 				/>
+
+				{currentTranscript && isRecording && (
+					<div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 max-h-24 overflow-hidden">
+						<div className="text-white text-xs leading-relaxed">
+							{currentTranscript}
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);
