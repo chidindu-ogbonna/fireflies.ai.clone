@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-const DeepgramOptions: LiveSchema = {
+const deepgramOptions: LiveSchema = {
 	model: "nova-3",
 	interim_results: true,
 	smart_format: true,
@@ -226,7 +226,7 @@ export default function MeetingPage() {
 		setIsStartingRecording(true);
 		try {
 			if (microphoneState === MicrophoneState.Ready) {
-				await connectToDeepgram(DeepgramOptions);
+				await connectToDeepgram(deepgramOptions);
 			}
 			startRecording(stream);
 			setHasStartedRecording(true);
@@ -255,7 +255,7 @@ export default function MeetingPage() {
 			return;
 		}
 		if (deepgramConnectionState !== LiveConnectionState.OPEN) {
-			await connectToDeepgram(DeepgramOptions);
+			await connectToDeepgram(deepgramOptions);
 		}
 		startRecording(stream);
 		setIsPaused(false);
