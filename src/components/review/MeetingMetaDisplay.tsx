@@ -3,14 +3,42 @@
 import { Button } from "@/components/ui/button";
 import { createMeetingSummary } from "@/lib/client/meetings.client";
 import { useMutation } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { BookOpenText, FileText, ListCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface SummaryDisplayProps {
 	meetingId: string;
 	summary?: string | null;
 	actionItems?: string | null;
 }
+
+interface TranscriptionDisplayProps {
+	transcription: string;
+}
+
+interface TextCardProps {
+	Icon: React.ElementType;
+	title: string;
+	content: string;
+	height?: "h-64" | "h-72" | "h-80" | "h-96";
+}
+
+const TextCard = ({ Icon, title, content, height = "h-64" }: TextCardProps) => {
+	return (
+		<div className="rounded-lg border p-6">
+			<div className="flex items-center text-lg font-semibold mb-4 gap-2">
+				<Icon className="w-6 h-6 text-primary" />
+				{title}
+			</div>
+			<div className={`max-w-none ${height} overflow-y-auto`}>
+				<div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+					{content}
+				</div>
+			</div>
+		</div>
+	);
+};
 
 export function SummaryDisplay({
 	meetingId,
@@ -28,6 +56,7 @@ export function SummaryDisplay({
 		},
 		onError: (error) => {
 			console.error("Error generating summary:", error);
+			toast.error("Error generating summary. Please try again.");
 		},
 	});
 
@@ -59,28 +88,32 @@ export function SummaryDisplay({
 	return (
 		<div className="space-y-6">
 			{currentSummary && (
-				<div className="rounded-lg border p-6">
-					<h3 className="text-lg font-semibold mb-4">Meeting Summary</h3>
-					<div className="prose max-w-none">
-						<div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-							{currentSummary}
-						</div>
-					</div>
-				</div>
+				<TextCard
+					Icon={BookOpenText}
+					title="Meeting Summary"
+					content={currentSummary}
+				/>
 			)}
-
 			{currentActionItems && (
-				<div className="rounded-lg border p-6">
-					<h3 className="text-lg font-semibold mb-4">Action Items</h3>
-					<div className="prose max-w-none">
-						<div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-							{currentActionItems}
-						</div>
-					</div>
-				</div>
+				<TextCard
+					Icon={ListCheck}
+					title="Action Items"
+					content={currentActionItems}
+				/>
 			)}
-
-			
 		</div>
+	);
+}
+
+export function TranscriptionDisplay({
+	transcription,
+}: TranscriptionDisplayProps) {
+	return (
+		<TextCard
+			Icon={FileText}
+			title="Transcription"
+			content={transcription}
+			height="h-80"
+		/>
 	);
 }

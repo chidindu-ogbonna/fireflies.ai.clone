@@ -2,8 +2,10 @@
 
 import { LoadingComponent } from "@/components/loading/LoadingComponent";
 import { NoUser } from "@/components/no-user/NoUser";
-import { SummaryDisplay } from "@/components/review/SummaryDisplay";
-import { TranscriptionDisplay } from "@/components/review/TranscriptionDisplay";
+import {
+	SummaryDisplay,
+	TranscriptionDisplay,
+} from "@/components/review/MeetingMetaDisplay";
 import { VideoPlayer } from "@/components/review/VideoPlayer";
 import { Button } from "@/components/ui/button";
 import { getMeeting } from "@/lib/client/meetings.client";

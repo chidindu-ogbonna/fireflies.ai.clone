@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDuration } from "date-fns";
+import { Clock } from "lucide-react";
 
 interface VideoPlayerProps {
 	videoUrl?: string | null;
@@ -31,16 +32,18 @@ export function VideoPlayer({ videoUrl, duration, title }: VideoPlayerProps) {
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex items-center justify-between">
-					<span>Recording</span>
+					<span>{title}</span>
 					{duration && (
-						<span className="text-sm text-muted-foreground">
+						<div className="text-sm flex items-center gap-2 text-muted-foreground">
+							<Clock className="w-4 h-4" />
 							{formatDuration({ seconds: duration })}
-						</span>
+						</div>
 					)}
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<div className="relative">
+					{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 					<video
 						controls
 						className="w-full rounded-lg"
@@ -52,9 +55,6 @@ export function VideoPlayer({ videoUrl, duration, title }: VideoPlayerProps) {
 						Your browser does not support the video tag.
 					</video>
 				</div>
-				<p className="text-sm text-muted-foreground mt-2">
-					{title} - Recorded Meeting
-				</p>
 			</CardContent>
 		</Card>
 	);
