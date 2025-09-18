@@ -82,10 +82,10 @@ export function VideoRecorder({
 
 			<div className="relative w-full h-full bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
 				{isLoading && (
-					<div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-						<div className="text-center">
+					<div className="absolute inset-0 flex items-center justify-center bg-accent">
+						<div className="text-center max-w-md mx-auto flex flex-col items-center justify-center">
 							<Spinner size={8} className="text-white mb-4" />
-							<p className="text-white/70 text-sm">Connecting to camera...</p>
+							<p className="text-white/70 text-sm">connecting to camera...</p>
 						</div>
 					</div>
 				)}
