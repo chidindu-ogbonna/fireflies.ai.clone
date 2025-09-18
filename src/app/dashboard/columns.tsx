@@ -24,12 +24,7 @@ export const columns: ColumnDef<Meeting>[] = [
 			return (
 				<div className="flex items-center gap-2">
 					<span>{meeting.title}</span>
-					{meeting.videoUrl && (
-						<Video
-							className="h-4 w-4 text-blue-500"
-							title="Has video recording"
-						/>
-					)}
+					{meeting.videoUrl && <Video className="h-4 w-4 text-blue-500" />}
 				</div>
 			);
 		},
