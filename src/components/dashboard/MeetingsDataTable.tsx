@@ -95,7 +95,7 @@ export function MeetingsDataTable<TData extends MeetingData, TValue>({
 					) : (
 						<TableRow>
 							<TableCell colSpan={columns.length} className="h-24 text-center">
-								No meetings found.
+								No meetings yet.
 							</TableCell>
 						</TableRow>
 					)}

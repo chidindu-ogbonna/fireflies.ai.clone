@@ -49,6 +49,8 @@ export default function MeetingPage() {
 	const [transcript, setTranscript] = useState<string[]>([]);
 	const [isRecording, setIsRecording] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
+	const [isStartingRecording, setIsStartingRecording] = useState(false);
+	const [isEndingRecording, setIsEndingRecording] = useState(false);
 	const {
 		setupMicrophone,
 		microphone,
@@ -205,20 +207,36 @@ export default function MeetingPage() {
 	}, []);
 
 	const handleStartRecording = async () => {
+		if (isStartingRecording || isRecording) {
+			/**
+			 * Prevent double clicks
+			 */
+			return;
+		}
 		if (!stream) {
 			console.error("No stream available for recording");
+			toast.error("Camera not ready. Please wait and try again.");
 			return;
 		}
 		if (!stream.active) {
 			console.error("Stream is not active");
+			toast.error("Camera stream is not active. Please refresh and try again.");
 			return;
 		}
-		if (microphoneState === MicrophoneState.Ready) {
-			await connectToDeepgram(DeepgramOptions);
+		setIsStartingRecording(true);
+		try {
+			if (microphoneState === MicrophoneState.Ready) {
+				await connectToDeepgram(DeepgramOptions);
+			}
+			startRecording(stream);
+			setHasStartedRecording(true);
+			setIsPaused(false);
+		} catch (error) {
+			console.error("Error starting recording:", error);
+			toast.error("Failed to start recording. Please try again.");
+		} finally {
+			setIsStartingRecording(false);
 		}
-		startRecording(stream);
-		setHasStartedRecording(true);
-		setIsPaused(false);
 	};
 
 	const handlePauseRecording = () => {
@@ -244,30 +262,41 @@ export default function MeetingPage() {
 	};
 
 	const handleEndMeeting = async () => {
-		if (isRecording) {
-			stopRecording();
-			stopMicrophone();
-			disconnectFromDeepgram();
+		if (isEndingRecording) {
+			/**
+			 * Prevent double clicks
+			 */
+			return;
 		}
-		setIsPaused(false);
-
-		/**
-		 * Wait a bit for the recording to finalize
-		 */
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-
-		let videoBlob: Blob | null = null;
-		let duration = 0;
-
-		if (recordedChunksRef.current.length > 0) {
-			videoBlob = new Blob(recordedChunksRef.current, { type: "video/webm" });
-			duration = Math.floor(
-				(Date.now() - recordingStartTimeRef.current) / 1000,
-			);
-			setPendingMeetingData({ videoBlob, duration });
-			setShowUploadDialog(true);
-		} else {
-			toast.error("No recording created.");
+		setIsEndingRecording(true);
+		try {
+			if (isRecording) {
+				stopRecording();
+				stopMicrophone();
+				disconnectFromDeepgram();
+			}
+			setIsPaused(false);
+			/**
+			 * Wait a bit for the recording to finalize
+			 */
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			let videoBlob: Blob | null = null;
+			let duration = 0;
+			if (recordedChunksRef.current.length > 0) {
+				videoBlob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+				duration = Math.floor(
+					(Date.now() - recordingStartTimeRef.current) / 1000,
+				);
+				setPendingMeetingData({ videoBlob, duration });
+				setShowUploadDialog(true);
+			} else {
+				toast.error("No recording created.");
+			}
+		} catch (error) {
+			console.error("Error ending recording:", error);
+			toast.error("Failed to end recording properly. Please try again.");
+		} finally {
+			setIsEndingRecording(false);
 		}
 	};
 
@@ -348,6 +377,8 @@ export default function MeetingPage() {
 					isAudioEnabled={isAudioEnabled}
 					isVideoEnabled={isVideoEnabled}
 					isEndMeetingEnabled={hasStartedRecording}
+					isStartingRecording={isStartingRecording}
+					isEndingRecording={isEndingRecording}
 				/>
 			</div>
 

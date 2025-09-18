@@ -11,6 +11,7 @@ import {
 	Video,
 	VideoOff,
 } from "lucide-react";
+import { Spinner } from "../ui/spinners";
 
 interface MeetingControlsProps {
 	onStartRecording: () => void;
@@ -24,6 +25,8 @@ interface MeetingControlsProps {
 	isAudioEnabled: boolean;
 	isVideoEnabled: boolean;
 	isEndMeetingEnabled: boolean;
+	isStartingRecording: boolean;
+	isEndingRecording: boolean;
 }
 
 export function MeetingControls({
@@ -38,6 +41,8 @@ export function MeetingControls({
 	isAudioEnabled,
 	isVideoEnabled,
 	isEndMeetingEnabled,
+	isStartingRecording,
+	isEndingRecording,
 }: MeetingControlsProps) {
 	return (
 		<div className="flex justify-center space-x-4 p-4 border-t">
@@ -86,13 +91,19 @@ export function MeetingControls({
 				<Button
 					variant={isRecording ? "outline" : "default"}
 					onClick={isRecording ? onPauseRecording : onStartRecording}
+					disabled={isStartingRecording}
 					className={
 						isRecording
 							? "bg-destructive hover:bg-destructive/90 animate-pulse"
 							: "bg-green-700 hover:bg-green-800"
 					}
 				>
-					{isRecording ? (
+					{isStartingRecording ? (
+						<>
+							<Spinner className="text-inherit" />
+							Start Recording
+						</>
+					) : isRecording ? (
 						<>
 							<Square className="h-5 w-5" />
 							Pause Recording
@@ -109,9 +120,13 @@ export function MeetingControls({
 			<Button
 				variant="destructive"
 				onClick={onEndMeeting}
-				disabled={!isEndMeetingEnabled}
+				disabled={!isEndMeetingEnabled || isEndingRecording}
 			>
-				<PhoneOff className="h-5 w-5" />
+				{isEndingRecording ? (
+					<Spinner className="text-inherit" />
+				) : (
+					<PhoneOff className="h-5 w-5" />
+				)}
 				End Recording
 			</Button>
 		</div>

@@ -199,25 +199,29 @@ export const MeetingUploadDialog = ({
 			id: "uploading" as ProgressStep,
 			icon: <Upload className="w-5 h-5" />,
 			title: "Uploading video",
-			description: "Securely uploading your meeting recording...",
+			description: "Securely uploading your recording.",
 		},
 		{
 			id: "transcribing" as ProgressStep,
 			icon: <FileText className="w-5 h-5" />,
 			title: "Transcribing video",
-			description: "Converting speech to text using AI...",
+			description: "Converting audio to text.",
 		},
 		{
 			id: "generating" as ProgressStep,
 			icon: <Sparkles className="w-5 h-5" />,
 			title: "Creating summary and action items",
-			description: "Analyzing content and generating insights...",
+			description: "Analyzing content and generating insights.",
 		},
 	];
 
 	return (
-		<Dialog open={isOpen} onOpenChange={isUploading ? () => {} : onOpenChange}>
-			<DialogContent className="max-w-md">
+		<Dialog open={isOpen} onOpenChange={() => {}}>
+			<DialogContent
+				className="max-w-md"
+				onEscapeKeyDown={(e) => e.preventDefault()}
+				onPointerDownOutside={(e) => e.preventDefault()}
+			>
 				<DialogHeader>
 					<DialogTitle>
 						{isUploading ? "Processing..." : "Save Recording"}
